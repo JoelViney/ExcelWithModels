@@ -8,6 +8,12 @@
             public string? Name { get; set; }
         }
 
+        public class TestHeaderSpacesModel
+        {
+            public string? FirstName { get; set; }
+            public string? LastName { get; set; }
+        }
+
         [TestMethod]
         public void MissingColumn()
         {
@@ -31,7 +37,6 @@
             Assert.AreEqual(0, validation.Row);
             Assert.AreEqual("The column 'Name' is missing from the worksheet.", validation.Message);
         }
-
 
         [TestMethod]
         public void ParseTwoColumns()
@@ -75,6 +80,27 @@
             // Assert
             Assert.AreEqual(0, validations.Count);
             Assert.AreEqual(0, models.Count);
+        }
+
+        [TestMethod]
+        public void ResolveColumnNamesWithSpaces()
+        {
+            // Arrange
+            using var excel = new ExcelModelLibrary();
+
+            var worksheet = excel.CreateWorksheet();
+            worksheet.Cells[1, 1].Value = "First Name"; // Headers
+            worksheet.Cells[1, 2].Value = "Last Name";
+            worksheet.Cells[2, 1].Value = "John";       // Columns
+            worksheet.Cells[2, 2].Value = "Smith";
+
+            // Act
+            var (models, validations) = excel.Parse<TestHeaderSpacesModel>(worksheet);
+
+            // Assert
+            var model = models.First();
+            Assert.AreEqual("John", model.FirstName);
+            Assert.AreEqual("Smith", model.LastName);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ExcelWithModels.Attributes;
+using ExcelWithModels.Helpers;
 using OfficeOpenXml;
 using System.Globalization;
 using System.Reflection;
@@ -201,10 +202,15 @@ namespace ExcelWithModels
                 }
 
                 string columnName = property.Name;
+                string? wordifiedColumnName = null;
                 if (Attribute.IsDefined(property, typeof(ExcelColumnNameAttribute)))
                 {
                     var nameAttribute = (ExcelColumnNameAttribute)property.GetCustomAttribute(typeof(ExcelColumnNameAttribute))!;
                     columnName = nameAttribute.Name;
+                }
+                else
+                {
+                    wordifiedColumnName = PropertyHelper.WordifyName(property.Name);
                 }
 
                 string? format = null;
@@ -216,7 +222,7 @@ namespace ExcelWithModels
 
                 var optional = Attribute.IsDefined(property, typeof(ExcelOptionalAttribute));
 
-                if (!headers.Any(x => x.name == columnName))
+                if (!headers.Any(x => x.name == columnName) && (wordifiedColumnName != null && !headers.Any(x => x.name == wordifiedColumnName)))
                 {
                     // No matching header for the property.
                     if (!optional)
@@ -225,13 +231,13 @@ namespace ExcelWithModels
                     }
                     continue;
                 }
-                var (col, _) = headers.First(x => x.name == columnName);
+                var (col, name) = headers.First(x => x.name == columnName || (wordifiedColumnName != null && x.name == wordifiedColumnName));
 
                 var propertyType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
                 var nullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
 
 
-                columnMappings.Add(new ExcelColumnMapping(col, columnName, property.Name, propertyType, nullable, format));
+                columnMappings.Add(new ExcelColumnMapping(col, name, property.Name, propertyType, nullable, format));
             }
 
             return (columnMappings, validations);
