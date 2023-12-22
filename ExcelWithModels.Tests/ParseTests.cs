@@ -54,5 +54,27 @@
             Assert.AreEqual("John Smith", model1.Name);
             Assert.AreEqual("Jane Smith", model2.Name);
         }
+
+        [TestMethod]
+        public void ParseIgnoreBlankRows()
+        {
+            // Arrange
+            using var excel = new ExcelModelLibrary();
+            var worksheet = excel.CreateWorksheet();
+            worksheet.Cells[1, 1].Value = "Name"; // Add the headers   
+
+            worksheet.Cells[2, 1].Value = ""; // Add the values
+            worksheet.Cells[2, 2].Value = "";
+            worksheet.Cells[2, 3].Value = "";
+            worksheet.Cells[2, 4].Value = "";
+            worksheet.Cells[2, 5].Value = "";
+
+            // Act
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
+
+            // Assert
+            Assert.AreEqual(0, validations.Count);
+            Assert.AreEqual(0, models.Count);
+        }
     }
 }

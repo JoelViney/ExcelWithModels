@@ -12,6 +12,7 @@ namespace ExcelWithModels
         public class TestNullableIntDomainModel
         {
             public int? Number { get; set; }
+            public string? Note { get; set; }
         }
 
         [TestMethod]
@@ -21,7 +22,8 @@ namespace ExcelWithModels
             using var excel = new ExcelModelLibrary();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Number"; // Headers   
+            worksheet.Cells[1, 1].Value = "Number"; // Headers
+            worksheet.Cells[1, 2].Value = "Note";
             worksheet.Cells[2, 1].Value = 23;       // Columns
 
             // Act
@@ -39,8 +41,10 @@ namespace ExcelWithModels
             using var excel = new ExcelModelLibrary();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Number"; // Headers   
+            worksheet.Cells[1, 1].Value = "Number"; // Headers
+            worksheet.Cells[1, 2].Value = "Note";
             worksheet.Cells[2, 1].Value = null;     // Columns
+            worksheet.Cells[2, 2].Value = "This is a note";
 
             // Act
             var (models, validations) = excel.Parse<TestNullableIntDomainModel>(worksheet);

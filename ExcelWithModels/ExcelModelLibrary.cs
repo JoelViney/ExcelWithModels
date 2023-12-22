@@ -28,12 +28,14 @@ namespace ExcelWithModels
 
         #endregion
 
+
         public ExcelWorksheet CreateWorksheet()
         {
             var worksheet = _excelPackage.Workbook.Worksheets.Add("Sheet1");
 
             return worksheet;
         }
+
 
         public (List<T>, List<ExcelValidation>) Parse<T>(ExcelWorksheet worksheet) where T: new()
         {
@@ -50,6 +52,11 @@ namespace ExcelWithModels
 
             for (int row = columnStart; row <= columnEnd; row++)
             {
+                if (IsEmptyRow(worksheet, row))
+                {
+                    continue; // Ignore empty rows
+                }
+
                 var item = new T();
                 list.Add(item);
 
@@ -57,72 +64,109 @@ namespace ExcelWithModels
                 {
                     var col = columnMapping.Col;
                     var property = modelType.GetProperty(columnMapping.PropertyName);
+                    var cell = worksheet.Cells[row, col];
 
-                    if (property != null)
-                    {
-                        var cellText = worksheet.Cells[row, col].Text;
+                    var propertyValidations = SetPropertyValue<T>(item, columnMapping, property, cell, row);
 
-                        if (columnMapping.PropertyType == typeof(string))
-                        {
-                            // Strings don't really support null in excel.
-                            property.SetValue(item, cellText);
-                        }
-                        else if (columnMapping.PropertyType == typeof(Int32))
-                        {
-                            if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
-                            {
-                                property.SetValue(item, null);
-                            }
-                            else if (Int32.TryParse(cellText, out int number))
-                            {
-                                property.SetValue(item, number);
-
-                            }
-                            else
-                            {
-                                // Return a validation error.
-                                validations.Add(new ExcelValidation(row, $"The numeric field '{columnMapping.ColumnName}' was not populated."));
-                            }
-                        }
-                        else if (columnMapping.PropertyType == typeof(DateTime))
-                        {
-                            if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
-                            {
-                                property.SetValue(item, null);
-                            }
-                            else if (columnMapping.Format != null)
-                            {
-                                if (DateTime.TryParseExact(cellText, columnMapping.Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
-                                {
-                                    property.SetValue(item, dateTime, null);
-                                }
-                                else
-                                {
-                                    validations.Add(new ExcelValidation(row, $"The column '{columnMapping.ColumnName}' is not in the '{columnMapping.Format}' format."));
-                                }
-                            }
-                            else if (DateTime.TryParse(cellText, out DateTime date))
-                            {
-                                property.SetValue(item, date);
-
-                            }
-                            else
-                            {
-                                // Return a validation error.
-                                validations.Add(new ExcelValidation(row, $"The date field '{columnMapping.ColumnName}' was not populated."));
-                            }
-                        }
-                        else
-                        {
-                            var cellValue = worksheet.Cells[row, col].Value;
-                            property.SetValue(item, cellValue);
-                        }
-                    }
+                    validations.AddRange(propertyValidations);
                 }
             }
             
             return (list, validations);
         }
+
+
+        private List<ExcelValidation> SetPropertyValue<T>(T item, ExcelColumnMapping columnMapping, PropertyInfo? property, ExcelRange cell, int row)
+        {
+            var validations = new List<ExcelValidation>();
+
+            if (property == null)
+            {
+                return validations;
+            }
+
+            var cellText = cell.Text;
+
+            if (columnMapping.PropertyType == typeof(string))
+            {
+                // Strings don't really support null in excel.
+                property.SetValue(item, cellText);
+            }
+            else if (columnMapping.PropertyType == typeof(Int32))
+            {
+                if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                {
+                    property.SetValue(item, null);
+                }
+                else if (Int32.TryParse(cellText, out int number))
+                {
+                    property.SetValue(item, number);
+
+                }
+                else
+                {
+                    // Return a validation error.
+                    validations.Add(new ExcelValidation(row, $"The numeric field '{columnMapping.ColumnName}' was not populated."));
+                }
+            }
+            else if (columnMapping.PropertyType == typeof(DateTime))
+            {
+                if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                {
+                    property.SetValue(item, null);
+                }
+                else if (columnMapping.Format != null)
+                {
+                    if (DateTime.TryParseExact(cellText, columnMapping.Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+                    {
+                        property.SetValue(item, dateTime, null);
+                    }
+                    else
+                    {
+                        validations.Add(new ExcelValidation(row, $"The column '{columnMapping.ColumnName}' is not in the '{columnMapping.Format}' format."));
+                    }
+                }
+                else if (DateTime.TryParse(cellText, out DateTime date))
+                {
+                    property.SetValue(item, date);
+
+                }
+                else
+                {
+                    // Return a validation error.
+                    validations.Add(new ExcelValidation(row, $"The date field '{columnMapping.ColumnName}' was not populated."));
+                }
+            }
+            else
+            {
+                var cellValue = cell.Value;
+                property.SetValue(item, cellValue);
+            }
+
+            return validations;
+        }
+
+
+        private static bool IsEmptyRow(ExcelWorksheet worksheet, int rowNumber)
+        {
+            var start = worksheet.Dimension.Start;
+            var end = worksheet.Dimension.End;
+
+            var emptyRow = true;
+            for (int col = start.Column; col <= end.Column; col++)
+            {
+                var cellText = worksheet.Cells[rowNumber, col].Text;
+
+                if (!string.IsNullOrEmpty(cellText))
+                {
+                    emptyRow = false;
+                    break;
+                }
+            }
+
+            return emptyRow;
+        }
+
 
         /// <summary>
         /// Builds the column mappings from the header.
