@@ -20,7 +20,7 @@ namespace ExcelWithModels
             using var excel = new ExcelModelLibrary();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Missing";    // Headers   
+            worksheet.Cells[1, 1].Value = "Name";    // Headers   
             worksheet.Cells[2, 1].Value = "John Smith"; // Columns
 
             // Act
@@ -29,13 +29,9 @@ namespace ExcelWithModels
             // Assert
             Assert.AreEqual(1, models.Count);
             var model = models.First();
-            Assert.AreEqual(null, model.Name);
+            Assert.AreEqual("John Smith", model.Name);
 
-            Assert.AreEqual(1, validations.Count);
-            var validation = validations.First();
-            Assert.AreEqual(0, validation.Row);
-            Assert.AreEqual("The column 'Name' is missing from the worksheet.", validation.Message);
+            Assert.AreEqual(0, validations.Count);
         }
-
     }
 }

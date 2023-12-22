@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using ExcelWithModels.Attributes;
+using OfficeOpenXml;
 
 namespace ExcelWithModels
 {
@@ -137,6 +138,11 @@ namespace ExcelWithModels
             var columnMappings = new List<ExcelColumnMapping>();
             foreach (var property in properties)
             {
+                if (Attribute.IsDefined(property, typeof(ExcelIgnoreAttribute)))
+                {
+                    continue;
+                }
+
                 if (!headers.Any(x => x.name == property.Name))
                 {
                     // No matching header for the property.
@@ -145,7 +151,6 @@ namespace ExcelWithModels
                 }
 
                 var (col, name) = headers.First(x => x.name == property.Name);
-
 
                 var propertyType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
                 var nullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
