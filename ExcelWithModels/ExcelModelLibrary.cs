@@ -169,10 +169,16 @@ namespace ExcelWithModels
                     var formatAttribute = (ExcelFormatAttribute)property.GetCustomAttribute(typeof(ExcelFormatAttribute))!;
                     format = formatAttribute.Format;
                 }
+
+                var optional = Attribute.IsDefined(property, typeof(ExcelOptionalAttribute));
+
                 if (!headers.Any(x => x.name == columnName))
                 {
                     // No matching header for the property.
-                    validations.Add(new ExcelValidation(0, $"The column '{property.Name}' is missing from the worksheet."));
+                    if (!optional)
+                    {
+                        validations.Add(new ExcelValidation(0, $"The column '{property.Name}' is missing from the worksheet."));
+                    }
                     continue;
                 }
                 var (col, _) = headers.First(x => x.name == columnName);
