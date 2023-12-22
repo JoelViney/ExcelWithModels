@@ -1,5 +1,6 @@
 ﻿using ExcelWithModels.Attributes;
 using OfficeOpenXml;
+using System.Globalization;
 using System.Reflection;
 
 namespace ExcelWithModels
@@ -89,6 +90,17 @@ namespace ExcelWithModels
                             {
                                 property.SetValue(item, null);
                             }
+                            else if (columnMapping.Format != null)
+                            {
+                                if (DateTime.TryParseExact(cellText, columnMapping.Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+                                {
+                                    property.SetValue(item, dateTime, null);
+                                }
+                                else
+                                {
+                                    validations.Add(new ExcelValidation(row, $"The column '{columnMapping.ColumnName}' is not in the '{columnMapping.Format}' format."));
+                                }
+                            }
                             else if (DateTime.TryParse(cellText, out DateTime date))
                             {
                                 property.SetValue(item, date);
@@ -151,19 +163,25 @@ namespace ExcelWithModels
                     columnName = nameAttribute.Name;
                 }
 
+                string? format = null;
+                if (Attribute.IsDefined(property, typeof(ExcelFormatAttribute)))
+                {
+                    var formatAttribute = (ExcelFormatAttribute)property.GetCustomAttribute(typeof(ExcelFormatAttribute))!;
+                    format = formatAttribute.Format;
+                }
                 if (!headers.Any(x => x.name == columnName))
                 {
                     // No matching header for the property.
                     validations.Add(new ExcelValidation(0, $"The column '{property.Name}' is missing from the worksheet."));
                     continue;
                 }
-
                 var (col, _) = headers.First(x => x.name == columnName);
 
                 var propertyType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
                 var nullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
 
-                columnMappings.Add(new ExcelColumnMapping(col, columnName, property.Name, propertyType, nullable));
+
+                columnMappings.Add(new ExcelColumnMapping(col, columnName, property.Name, propertyType, nullable, format));
             }
 
             return (columnMappings, validations);
