@@ -1,26 +1,22 @@
-﻿using ExcelWithModels.Attributes;
-
-namespace ExcelWithModels
+﻿namespace ExcelWithModels.Attributes
 {
-
     [TestClass]
-    public class ParseIgnoreAttributeTests
+    public class ParseColumnNameAttributeTests
     {
         public class TestModel
         {
-            [ExcelIgnore]
-            public int Id { get; set; }
+            [ExcelColumnName("Full Name")]
             public string? Name { get; set; }
         }
 
         [TestMethod]
-        public void PropertyIsIgnored()
+        public void CustomColumnName()
         {
             // Arrange
             using var excel = new ExcelModelLibrary();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Name";    // Headers   
+            worksheet.Cells[1, 1].Value = "Full Name";    // Headers   
             worksheet.Cells[2, 1].Value = "John Smith"; // Columns
 
             // Act
@@ -30,8 +26,6 @@ namespace ExcelWithModels
             Assert.AreEqual(1, models.Count);
             var model = models.First();
             Assert.AreEqual("John Smith", model.Name);
-
-            Assert.AreEqual(0, validations.Count);
         }
     }
 }

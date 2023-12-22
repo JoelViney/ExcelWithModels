@@ -1,5 +1,6 @@
 ﻿using ExcelWithModels.Attributes;
 using OfficeOpenXml;
+using System.Reflection;
 
 namespace ExcelWithModels
 {
@@ -54,7 +55,7 @@ namespace ExcelWithModels
                 foreach (var columnMapping in columnMappings)
                 {
                     var col = columnMapping.Col;
-                    var property = modelType.GetProperty(columnMapping.ColumnName);
+                    var property = modelType.GetProperty(columnMapping.PropertyName);
 
                     if (property != null)
                     {
@@ -143,19 +144,26 @@ namespace ExcelWithModels
                     continue;
                 }
 
-                if (!headers.Any(x => x.name == property.Name))
+                string columnName = property.Name;
+                if (Attribute.IsDefined(property, typeof(ExcelColumnNameAttribute)))
+                {
+                    var nameAttribute = (ExcelColumnNameAttribute)property.GetCustomAttribute(typeof(ExcelColumnNameAttribute))!;
+                    columnName = nameAttribute.Name;
+                }
+
+                if (!headers.Any(x => x.name == columnName))
                 {
                     // No matching header for the property.
                     validations.Add(new ExcelValidation(0, $"The column '{property.Name}' is missing from the worksheet."));
                     continue;
                 }
 
-                var (col, name) = headers.First(x => x.name == property.Name);
+                var (col, _) = headers.First(x => x.name == columnName);
 
                 var propertyType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
                 var nullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
 
-                columnMappings.Add(new ExcelColumnMapping(col, name, propertyType, nullable));
+                columnMappings.Add(new ExcelColumnMapping(col, columnName, property.Name, propertyType, nullable));
             }
 
             return (columnMappings, validations);
