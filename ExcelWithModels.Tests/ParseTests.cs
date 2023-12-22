@@ -1,13 +1,13 @@
 ﻿namespace ExcelWithModels
 {
-    public class TestDomainModel
-    {
-        public string? Name { get; set; }
-    }
-
     [TestClass]
     public class ParseTests
     {
+        public class TestModel
+        {
+            public string? Name { get; set; }
+        }
+
         [TestMethod]
         public void MissingColumn()
         {
@@ -15,11 +15,11 @@
             using var excel = new ExcelModelLibrary();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Missing";       // Headers   
+            worksheet.Cells[1, 1].Value = "Missing";    // Headers   
             worksheet.Cells[2, 1].Value = "John Smith"; // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestStringDomainModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
             Assert.AreEqual(1, models.Count);
@@ -45,7 +45,7 @@
             worksheet.Cells[3, 1].Value = "Jane Smith";
 
             // Act
-            var (models, validations) = excel.Parse<TestDomainModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
             Assert.AreEqual(2, models.Count);

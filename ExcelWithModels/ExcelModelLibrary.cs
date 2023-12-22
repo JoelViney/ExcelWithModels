@@ -54,22 +54,40 @@ namespace ExcelWithModels
                 {
                     var col = columnMapping.Col;
                     var property = modelType.GetProperty(columnMapping.ColumnName);
-                    var propType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
-                    var nullable = property.PropertyType == typeof(Nullable<>);
 
                     if (property != null)
                     {
                         var cellText = worksheet.Cells[row, col].Text;
-                        var cellValue = worksheet.Cells[row, col].Value;
 
-                        if (property.PropertyType == typeof(string))
+                        if (columnMapping.PropertyType == typeof(string))
                         {
                             // Strings don't really support null in excel.
                             property.SetValue(item, cellText);
                         }
-                        else if (property.PropertyType == typeof(DateTime))
+                        else if (columnMapping.PropertyType == typeof(Int32))
                         {
-                            if (DateTime.TryParse(cellText, out DateTime date))
+                            if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                            {
+                                property.SetValue(item, null);
+                            }
+                            else if (Int32.TryParse(cellText, out int number))
+                            {
+                                property.SetValue(item, number);
+
+                            }
+                            else
+                            {
+                                // Return a validation error.
+                                validations.Add(new ExcelValidation(row, $"The numeric field '{columnMapping.ColumnName}' was not populated."));
+                            }
+                        }
+                        else if (columnMapping.PropertyType == typeof(DateTime))
+                        {
+                            if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                            {
+                                property.SetValue(item, null);
+                            }
+                            else if (DateTime.TryParse(cellText, out DateTime date))
                             {
                                 property.SetValue(item, date);
 
@@ -82,8 +100,8 @@ namespace ExcelWithModels
                         }
                         else
                         {
+                            var cellValue = worksheet.Cells[row, col].Value;
                             property.SetValue(item, cellValue);
-
                         }
                     }
                 }
@@ -129,7 +147,10 @@ namespace ExcelWithModels
                 var (col, name) = headers.First(x => x.name == property.Name);
 
 
-                columnMappings.Add(new ExcelColumnMapping(col, name, property.GetType()));
+                var propertyType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
+                var nullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
+
+                columnMappings.Add(new ExcelColumnMapping(col, name, propertyType, nullable));
             }
 
             return (columnMappings, validations);

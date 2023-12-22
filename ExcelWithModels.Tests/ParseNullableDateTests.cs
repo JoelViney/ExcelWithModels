@@ -1,15 +1,15 @@
 ﻿namespace ExcelWithModels
 {
     [TestClass]
-    public class ParseDateTests
+    public class ParseNullableDateTests
     {
         public class TestModel
         {
-            public DateTime Date { get; set; }
+            public DateTime? Date { get; set; }
         }
 
         [TestMethod]
-        public void ParseDate()
+        public void ParseNullableDate()
         {
             // Arrange
             using var excel = new ExcelModelLibrary();
@@ -40,13 +40,9 @@
             var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
-            var model = models.FirstOrDefault();
-            Assert.AreEqual(new DateTime(), model?.Date);
-
-            Assert.AreEqual(1, validations.Count);
-            var validation = validations.First();
-            Assert.AreEqual(2, validation.Row);
-            Assert.AreEqual("The date field 'Date' was not populated.", validation.Message);
+            Assert.AreEqual(1, models.Count);
+            var model = models.First();
+            Assert.IsNull(model?.Date);
         }
     }
 }

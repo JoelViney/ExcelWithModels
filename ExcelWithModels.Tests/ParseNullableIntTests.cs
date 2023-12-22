@@ -1,15 +1,21 @@
-﻿namespace ExcelWithModels
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ExcelWithModels
 {
     [TestClass]
-    public class ParseIntTests
+    public class ParseNullableIntTests
     {
-        public class TestModel
+        public class TestNullableIntDomainModel
         {
-            public int Number { get; set; }
+            public int? Number { get; set; }
         }
 
         [TestMethod]
-        public void ParseInt()
+        public void ParseNullableInt()
         {
             // Arrange
             using var excel = new ExcelModelLibrary();
@@ -19,7 +25,7 @@
             worksheet.Cells[2, 1].Value = 23;       // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestModel>(worksheet);
+            var (models, validations) = excel.Parse<TestNullableIntDomainModel>(worksheet);
 
             // Assert
             var model = models.FirstOrDefault();
@@ -27,7 +33,7 @@
         }
 
         [TestMethod]
-        public void ParseIntIsNullReturnsValidation()
+        public void ParseNullableIntAsNull()
         {
             // Arrange
             using var excel = new ExcelModelLibrary();
@@ -37,16 +43,12 @@
             worksheet.Cells[2, 1].Value = null;     // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestModel>(worksheet);
+            var (models, validations) = excel.Parse<TestNullableIntDomainModel>(worksheet);
 
             // Assert
-            var model = models.FirstOrDefault();
-            Assert.AreEqual(0, model?.Number);
-
-            Assert.AreEqual(1, validations.Count);
-            var validation = validations.First();
-            Assert.AreEqual(2, validation.Row);
-            Assert.AreEqual("The numeric field 'Number' was not populated.", validation.Message);
+            Assert.AreEqual(1, models.Count);
+            var model = models.First();
+            Assert.IsNull(model?.Number);
         }
     }
 }

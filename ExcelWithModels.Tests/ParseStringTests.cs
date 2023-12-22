@@ -1,13 +1,13 @@
 namespace ExcelWithModels
 {
-    public class TestStringDomainModel 
-    {
-        public string? Name { get; set; }
-    }
-
     [TestClass]
     public class ParseStringTests
     {
+        public class TestModel
+        {
+            public string? Name { get; set; }
+        }
+
         [TestMethod]
         public void ParseString()
         {
@@ -19,12 +19,11 @@ namespace ExcelWithModels
             worksheet.Cells[2, 1].Value = "John Smith"; // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestStringDomainModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
-            Assert.AreEqual(1, models.Count);
-            var model = models.First();
-            Assert.AreEqual("John Smith", model.Name);
+            var model = models.FirstOrDefault();
+            Assert.AreEqual("John Smith", model?.Name);
         }
 
         [TestMethod]
@@ -38,12 +37,11 @@ namespace ExcelWithModels
             worksheet.Cells[2, 1].Value = null;     // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestStringDomainModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
-            Assert.AreEqual(1, models.Count);
-            var model = models.First();
-            Assert.AreEqual("", model.Name); 
+            var model = models.FirstOrDefault();
+            Assert.AreEqual("", model?.Name); 
         }
     }
 }
