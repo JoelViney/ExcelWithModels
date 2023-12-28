@@ -59,6 +59,11 @@ namespace ExcelWithModels
                 var item = new T();
                 list.Add(item);
 
+                if (item is ExcelModelBase baseModel)
+                {
+                    baseModel.RowNumber = row;
+                }
+
                 foreach (var columnMapping in columnMappings)
                 {
                     var col = columnMapping.Col;
