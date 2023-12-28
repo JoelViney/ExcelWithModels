@@ -13,7 +13,7 @@
         public void ParseBoolean()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "TrueOrFalse"; // Headers
@@ -32,12 +32,12 @@
         public void ParseBooleanString()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "TrueOrFalse"; // Headers
             worksheet.Cells[1, 2].Value = "Note";
-            worksheet.Cells[2, 1].Value = "true";       // Columns
+            worksheet.Cells[2, 1].Value = "TRUE";       // Columns
 
             // Act
             var (models, validations) = excel.Parse<TestModel>(worksheet);
@@ -51,7 +51,7 @@
         public void ParseBooleanIsNullReturnsValidation()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "TrueOrFalse"; // Headers

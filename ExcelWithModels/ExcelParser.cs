@@ -1,6 +1,4 @@
-﻿using ExcelWithModels.Attributes;
-using ExcelWithModels.Helpers;
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 using System.Globalization;
 using System.Reflection;
 
@@ -9,13 +7,13 @@ namespace ExcelWithModels
     /// <summary>
     /// Used to convert a class model to an excel document or vice versa
     /// </summary>
-    public class ExcelModelLibrary : IDisposable
+    public class ExcelParser : IDisposable
     {
         private ExcelPackage _excelPackage;
 
         #region Constructors/Destructors....
 
-        public ExcelModelLibrary()
+        public ExcelParser()
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -44,7 +42,7 @@ namespace ExcelWithModels
             var validations = new List<ExcelValidation>();
 
             // Build the Column Mappings
-            var (columnMappings, mappingValidations) = BuildColumnMappings<T>(worksheet);
+            var (columnMappings, mappingValidations) = ExcelColumnMapping.BuildColumnMappings<T>(worksheet);
             validations.AddRange(mappingValidations);
 
             Type modelType = typeof(T);
@@ -100,11 +98,11 @@ namespace ExcelWithModels
                 {
                     property.SetValue(item, null);
                 }
-                else if (cellText == "true" || cellText == "1")
+                else if (cellText == "true" || cellText == "TRUE" || cellText == "1")
                 {
                     property.SetValue(item, true);
                 }
-                else if (cellText == "false" || cellText == "0")
+                else if (cellText == "false" || cellText == "FALSE" || cellText == "0")
                 {
                     property.SetValue(item, true);
                 }
@@ -186,81 +184,6 @@ namespace ExcelWithModels
             }
 
             return emptyRow;
-        }
-
-
-        /// <summary>
-        /// Builds the column mappings from the header.
-        /// </summary>
-        internal static (List<ExcelColumnMapping>, List<ExcelValidation>) BuildColumnMappings<T>(ExcelWorksheet worksheet) where T : new()
-        {
-            var validations = new List<ExcelValidation>();
-
-            // Get the worksheets dimensions
-            var headerRow = worksheet.Dimension.Start.Row;
-            var startColumn = worksheet.Dimension.Start.Column;
-            var endColumn = worksheet.Dimension.End.Column;
-
-            // Read the headers
-            var ex = new Dictionary<int, string>();
-            var headers = new List<(int col, string name)>();
-            for (int col = startColumn; col <= endColumn; col++)
-            {
-                headers.Add((col, name: worksheet.Cells[headerRow, col].Text));
-            }
-
-            // Build the Column Mappings
-            var model = new T();
-            var properties = model.GetType().GetProperties();
-
-            var columnMappings = new List<ExcelColumnMapping>();
-            foreach (var property in properties)
-            {
-                if (Attribute.IsDefined(property, typeof(ExcelIgnoreAttribute)))
-                {
-                    continue;
-                }
-
-                string columnName = property.Name;
-                string? wordifiedColumnName = null;
-                if (Attribute.IsDefined(property, typeof(ExcelColumnNameAttribute)))
-                {
-                    var nameAttribute = (ExcelColumnNameAttribute)property.GetCustomAttribute(typeof(ExcelColumnNameAttribute))!;
-                    columnName = nameAttribute.Name;
-                }
-                else
-                {
-                    wordifiedColumnName = PropertyHelper.WordifyName(property.Name);
-                }
-
-                string? format = null;
-                if (Attribute.IsDefined(property, typeof(ExcelFormatAttribute)))
-                {
-                    var formatAttribute = (ExcelFormatAttribute)property.GetCustomAttribute(typeof(ExcelFormatAttribute))!;
-                    format = formatAttribute.Format;
-                }
-
-                var optional = Attribute.IsDefined(property, typeof(ExcelOptionalAttribute));
-
-                if (!headers.Any(x => x.name == columnName) && (wordifiedColumnName != null && !headers.Any(x => x.name == wordifiedColumnName)))
-                {
-                    // No matching header for the property.
-                    if (!optional)
-                    {
-                        validations.Add(new ExcelValidation(0, $"The column '{property.Name}' is missing from the worksheet."));
-                    }
-                    continue;
-                }
-                var (col, name) = headers.First(x => x.name == columnName || (wordifiedColumnName != null && x.name == wordifiedColumnName));
-
-                var propertyType = Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
-                var nullable = Nullable.GetUnderlyingType(property.PropertyType) != null;
-
-
-                columnMappings.Add(new ExcelColumnMapping(col, name, property.Name, propertyType, nullable, format));
-            }
-
-            return (columnMappings, validations);
         }
     }
 }

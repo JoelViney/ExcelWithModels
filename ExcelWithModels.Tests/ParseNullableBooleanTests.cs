@@ -19,7 +19,7 @@ namespace ExcelWithModels
         public void ParseNullableBoolean()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "TrueOrFalse"; // Headers
@@ -38,7 +38,7 @@ namespace ExcelWithModels
         public void ParseNullableBooleanAsNull()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "TrueOrFalse"; // Headers

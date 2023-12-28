@@ -13,7 +13,7 @@ namespace ExcelWithModels
         public void ParseString()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Name";       // Headers   
@@ -32,7 +32,7 @@ namespace ExcelWithModels
         public void ParseStringNullIsEmpty()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Name";   // Headers

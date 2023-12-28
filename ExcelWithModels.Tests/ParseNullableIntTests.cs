@@ -19,7 +19,7 @@ namespace ExcelWithModels
         public void ParseNullableInt()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Number"; // Headers
@@ -38,7 +38,7 @@ namespace ExcelWithModels
         public void ParseNullableIntAsNull()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Number"; // Headers

@@ -20,7 +20,7 @@
         public void ParseFormattedDate()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Date";       // Headers   
@@ -38,7 +38,7 @@
         public void ParseFormattedAmericanDate()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Date";       // Headers   
@@ -56,7 +56,7 @@
         public void ParseInvalidDateFormat()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Date";       // Headers   

@@ -13,7 +13,7 @@
         public void CustomColumnName()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Full Name";    // Headers   

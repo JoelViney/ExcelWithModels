@@ -18,7 +18,7 @@
         public void MissingColumn()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Missing";    // Headers   
@@ -42,7 +42,7 @@
         public void ParseTwoColumns()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Name";       // Headers   
@@ -64,7 +64,7 @@
         public void ParseIgnoreBlankRows()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "Name"; // Add the headers   
 
@@ -86,7 +86,7 @@
         public void ResolveColumnNamesWithSpaces()
         {
             // Arrange
-            using var excel = new ExcelModelLibrary();
+            using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
             worksheet.Cells[1, 1].Value = "First Name"; // Headers
