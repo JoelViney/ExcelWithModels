@@ -87,11 +87,32 @@ namespace ExcelWithModels
             }
 
             var cellText = cell.Text;
+            var cellValue = cell.Value;
 
             if (columnMapping.PropertyType == typeof(string))
             {
                 // Strings don't really support null in excel.
                 property.SetValue(item, cellText);
+            }
+            else if (columnMapping.PropertyType == typeof(Boolean))
+            {
+                if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                {
+                    property.SetValue(item, null);
+                }
+                else if (cellText == "true" || cellText == "1")
+                {
+                    property.SetValue(item, true);
+                }
+                else if (cellText == "false" || cellText == "0")
+                {
+                    property.SetValue(item, true);
+                }
+                else
+                {
+                    // Return a validation error.
+                    validations.Add(new ExcelValidation(row, $"The boolean field '{columnMapping.ColumnName}' was not populated."));
+                }
             }
             else if (columnMapping.PropertyType == typeof(Int32))
             {
@@ -140,7 +161,6 @@ namespace ExcelWithModels
             }
             else
             {
-                var cellValue = cell.Value;
                 property.SetValue(item, cellValue);
             }
 
