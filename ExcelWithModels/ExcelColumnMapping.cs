@@ -7,20 +7,20 @@ namespace ExcelWithModels
 {
     internal class ExcelColumnMapping(int col, string columnName, string propertyName, Type propertyType, bool nullable, string? format)
     {
-        public int Col { get; set; } = col;
+        public int Col { get; } = col;
 
         /// <summary>The name of the Column in the worksheet defined in the column header.</summary>
-        public string ColumnName { get; set; } = columnName;
+        public string ColumnName { get; } = columnName;
         
         /// <summary>The name of the property in the model.</summary>
-        public string PropertyName { get; set; } = propertyName;
+        public string PropertyName { get; } = propertyName;
 
-        public Type PropertyType { get; set; } = propertyType;
+        public Type PropertyType { get; } = propertyType;
         
-        public bool Nullable { get; set; } = nullable;
+        public bool Nullable { get; } = nullable;
 
         /// <summary>An optional format for the reading and writing of the provided data.</summary>
-        public string? Format { get; set; } = format;
+        public string? Format { get; } = format;
 
 
 
@@ -96,6 +96,58 @@ namespace ExcelWithModels
             }
 
             return (columnMappings, validations);
+        }
+
+        /// <summary>Builds the column mapping based on the provided class.</summary>
+        internal static List<ExcelColumnMapping> BuildPropertyMappings<T>() where T : new()
+        {
+            var list = new List<ExcelColumnMapping>();
+            var temp = new T();
+            var properties = temp.GetType().GetProperties();
+
+            // Map Column Names to Class Properties
+            var col = 0;
+            foreach (var property in properties)
+            {
+                if (Attribute.IsDefined(property, typeof(ExcelIgnoreAttribute)))
+                {
+                    continue;
+                }
+
+                if (property.Name == "LazyLoader")
+                {
+                    continue;
+                }
+
+                col++;
+
+                var propertyName = property.Name;
+                var columnName = propertyName;
+                var propertyType = System.Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
+                var nullable = System.Nullable.GetUnderlyingType(property.PropertyType) != null;
+                string? format = null;
+
+                if (Attribute.IsDefined(property, typeof(ExcelColumnNameAttribute)))
+                {
+                    var nameAttribute = (ExcelColumnNameAttribute?)property.GetCustomAttribute(typeof(ExcelColumnNameAttribute));
+                    columnName = nameAttribute!.Name;
+                }
+                else
+                {
+                    columnName = PropertyHelper.WordifyName(property.Name);
+                }
+
+                if (Attribute.IsDefined(property, typeof(ExcelFormatAttribute)))
+                {
+                    var formatAttribute = (ExcelFormatAttribute?)property.GetCustomAttribute(typeof(ExcelFormatAttribute));
+
+                    format = formatAttribute!.Format;
+                }
+
+                list.Add(new ExcelColumnMapping(col, columnName, propertyName, propertyType, nullable, format));
+            }
+
+            return list;
         }
     }
 }

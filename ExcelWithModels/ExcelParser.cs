@@ -28,9 +28,9 @@ namespace ExcelWithModels
         #endregion
 
 
-        public ExcelWorksheet CreateWorksheet()
+        public ExcelWorksheet CreateWorksheet(string name = "Sheet1")
         {
-            var worksheet = _excelPackage.Workbook.Worksheets.Add("Sheet1");
+            var worksheet = _excelPackage.Workbook.Worksheets.Add(name);
 
             return worksheet;
         }
@@ -149,7 +149,10 @@ namespace ExcelWithModels
                 else if (DateTime.TryParse(cellText, out DateTime date))
                 {
                     property.SetValue(item, date);
-
+                }
+                else if (cellValue is DateTime dateValue)
+                {
+                    property.SetValue(item, dateValue);
                 }
                 else
                 {

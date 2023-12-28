@@ -29,6 +29,25 @@
         }
 
         [TestMethod]
+        public void ParseDateValue()
+        {
+            // Arrange
+            using var excel = new ExcelParser();
+
+            var worksheet = excel.CreateWorksheet();
+            worksheet.Cells[1, 1].Value = "Date";       // Headers
+            worksheet.Cells[1, 2].Value = "Note";
+            worksheet.Cells[2, 1].Value = new DateTime(2023, 09, 12); // Columns
+
+            // Act
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
+
+            // Assert
+            var model = models.FirstOrDefault();
+            Assert.AreEqual(new DateTime(2023, 09, 12), model?.Date);
+        }
+
+        [TestMethod]
         public void ParseDateIsNullReturnsValidation()
         {
             // Arrange
