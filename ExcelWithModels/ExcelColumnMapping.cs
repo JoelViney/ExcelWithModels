@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace ExcelWithModels
 {
-    internal class ExcelColumnMapping(int col, string columnName, string propertyName, Type propertyType, bool nullable, string? format)
+    internal class ExcelColumnMapping(int col, string columnName, string propertyName, Type propertyType, bool nullable, bool required, string? format)
     {
         public int Col { get; } = col;
 
@@ -19,10 +19,10 @@ namespace ExcelWithModels
         
         public bool Nullable { get; } = nullable;
 
+        public bool Required { get; } = required;
+
         /// <summary>An optional format for the reading and writing of the provided data.</summary>
         public string? Format { get; } = format;
-
-
 
         /// <summary>
         /// Builds the column mappings from the header.
@@ -77,6 +77,8 @@ namespace ExcelWithModels
 
                 var optional = Attribute.IsDefined(property, typeof(ExcelOptionalAttribute));
 
+                var required = Attribute.IsDefined(property, typeof(ExcelRequiredAttribute));
+
                 if (!headers.Any(x => x.name == columnName) && (wordifiedColumnName != null && !headers.Any(x => x.name == wordifiedColumnName)))
                 {
                     // No matching header for the property.
@@ -90,9 +92,9 @@ namespace ExcelWithModels
 
                 var propertyType = System.Nullable.GetUnderlyingType(property!.PropertyType) ?? property.PropertyType;
                 var nullable = System.Nullable.GetUnderlyingType(property.PropertyType) != null;
+                
 
-
-                columnMappings.Add(new ExcelColumnMapping(col, name, property.Name, propertyType, nullable, format));
+                columnMappings.Add(new ExcelColumnMapping(col, name, property.Name, propertyType, nullable, required, format));
             }
 
             return (columnMappings, validations);
@@ -144,7 +146,9 @@ namespace ExcelWithModels
                     format = formatAttribute!.Format;
                 }
 
-                list.Add(new ExcelColumnMapping(col, columnName, propertyName, propertyType, nullable, format));
+                var required = Attribute.IsDefined(property, typeof(ExcelRequiredAttribute));
+
+                list.Add(new ExcelColumnMapping(col, columnName, propertyName, propertyType, nullable, required, format));
             }
 
             return list;

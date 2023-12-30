@@ -1,7 +1,7 @@
 ﻿namespace ExcelWithModels.Attributes
 {
     [TestClass]
-    public class ParseDateFormatTests
+    public class ParseFormatAttributeTests
     {
         public class TestModel
         {

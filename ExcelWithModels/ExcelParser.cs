@@ -93,6 +93,11 @@ namespace ExcelWithModels
             var cellText = cell.Text;
             var cellValue = cell.Value;
 
+            if (columnMapping.Required && (cellValue == null || cellText == ""))
+            {
+                validations.Add(new ExcelValidation(row, $"The {columnMapping.PropertyType.Name.ToLower()} field '{columnMapping.ColumnName}' is a required field."));
+
+            }
             if (columnMapping.PropertyType == typeof(string))
             {
                 // Strings don't really support null in excel.
