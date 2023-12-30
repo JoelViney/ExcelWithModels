@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using ExcelWithModels.Helpers;
+using OfficeOpenXml;
 using System.Globalization;
 using System.Reflection;
 
@@ -117,23 +118,6 @@ namespace ExcelWithModels
                     validations.Add(new ExcelValidation(row, $"The boolean field '{columnMapping.ColumnName}' was not populated."));
                 }
             }
-            else if (columnMapping.PropertyType == typeof(Int32))
-            {
-                if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
-                {
-                    property.SetValue(item, null);
-                }
-                else if (Int32.TryParse(cellText, out int number))
-                {
-                    property.SetValue(item, number);
-
-                }
-                else
-                {
-                    // Return a validation error.
-                    validations.Add(new ExcelValidation(row, $"The numeric field '{columnMapping.ColumnName}' was not populated."));
-                }
-            }
             else if (columnMapping.PropertyType == typeof(DateTime))
             {
                 if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
@@ -163,6 +147,39 @@ namespace ExcelWithModels
                 {
                     // Return a validation error.
                     validations.Add(new ExcelValidation(row, $"The date field '{columnMapping.ColumnName}' was not populated."));
+                }
+            }
+            else if (columnMapping.PropertyType.BaseType == typeof(Enum))
+            {
+                if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                {
+                    property.SetValue(item, null);
+                }
+                else if (!string.IsNullOrEmpty(cellText) && Enum.TryParse(columnMapping.PropertyType, PropertyHelper.DeWordifyName(cellText), out object? obj))
+                {
+                    property.SetValue(item, obj);
+                }
+                else
+                {
+                    // Return a validation error.
+                    validations.Add(new ExcelValidation(row, $"The enum field '{columnMapping.ColumnName}' was not populated."));
+                }
+            }
+            else if (columnMapping.PropertyType == typeof(Int32))
+            {
+                if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
+                {
+                    property.SetValue(item, null);
+                }
+                else if (Int32.TryParse(cellText, out int number))
+                {
+                    property.SetValue(item, number);
+
+                }
+                else
+                {
+                    // Return a validation error.
+                    validations.Add(new ExcelValidation(row, $"The numeric field '{columnMapping.ColumnName}' was not populated."));
                 }
             }
             else

@@ -22,5 +22,10 @@
 
             return result;
         }
+
+        internal static string DeWordifyName(string text)
+        {
+            return text.Replace(" ", "");
+        }
     }
 }

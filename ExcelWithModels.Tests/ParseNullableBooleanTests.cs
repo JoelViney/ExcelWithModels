@@ -3,7 +3,7 @@
     [TestClass]
     public class ParseNullableBooleanTests
     {
-        public class TestNullableIntDomainModel
+        public class TestModel
         {
             public bool? TrueOrFalse{ get; set; }
             public string? Note { get; set; }
@@ -21,7 +21,7 @@
             worksheet.Cells[2, 1].Value = true;       // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestNullableIntDomainModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
             var model = models.FirstOrDefault();
@@ -29,7 +29,7 @@
         }
 
         [TestMethod]
-        public void ParseNullableBooleanAsNull()
+        public void ParseNullableBooleanIsNullReturnsNull()
         {
             // Arrange
             using var excel = new ExcelParser();
@@ -41,7 +41,7 @@
             worksheet.Cells[2, 2].Value = "This is a note";
 
             // Act
-            var (models, validations) = excel.Parse<TestNullableIntDomainModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
             Assert.AreEqual(1, models.Count);

@@ -1,5 +1,7 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using static OfficeOpenXml.ExcelErrorValue;
+using System.Data;
 
 namespace ExcelWithModels
 {
@@ -58,17 +60,7 @@ namespace ExcelWithModels
                         var columnMapping = columnMappings[i];
                         var value = modelType.GetProperty(columnMapping.PropertyName)!.GetValue(model);
 
-                        if (value != null && (columnMapping.PropertyType == typeof(DateTime) || columnMapping.PropertyType == typeof(DateTime?)))
-                        {
-                            if (datesToStrings)
-                            {
-                                var date = (DateTime)value;
-                                var format = columnMapping.Format ?? DefaultDateFormat;
-                                value = date.ToString(format);
-                            }
-                        }
-
-                        worksheet.Cells[rowNumber, (i + 1)].Value = value;
+                        SetCellValue(worksheet.Cells[rowNumber, (i + 1)], value, columnMapping, datesToStrings);
                     }
 
                     rowNumber++;
@@ -81,6 +73,36 @@ namespace ExcelWithModels
             }
 
             return _excelPackage;
+        }
+    
+        private void SetCellValue(ExcelRange cell, object? value, ExcelColumnMapping columnMapping, bool datesToStrings)
+        {
+            if (value == null)
+            {
+                cell.Value = null;
+                return;
+            }
+            
+            object? cellValue = null;
+            if (columnMapping.PropertyType == typeof(DateTime))
+            {
+                if (datesToStrings)
+                {
+                    var date = (DateTime)value;
+                    var format = columnMapping.Format ?? DefaultDateFormat;
+                    cellValue = date.ToString(format);
+                }
+            }
+            else if (columnMapping.PropertyType == typeof(Enum))
+            {
+                cellValue = value.ToString();
+            }
+            else
+            {
+                cellValue = value.ToString();
+            }
+
+            cell.Value = cellValue;
         }
     }
 }

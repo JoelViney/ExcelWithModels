@@ -1,41 +1,55 @@
-﻿namespace ExcelWithModels
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ExcelWithModels
 {
     [TestClass]
-    public class ParseNullableDateTests
+    public class ParseNullableEnumTests
     {
+        public enum TestEnum
+        {
+            NotSpecified = 0,
+            Green = 1,
+            Blue = 2,
+            Red = 4
+        }
+
         public class TestModel
         {
-            public DateTime? Date { get; set; }
+            public TestEnum? Colour { get; set; }
             public string? Note { get; set; }
         }
 
         [TestMethod]
-        public void ParseNullableDate()
+        public void ParseNullableEnum()
         {
             // Arrange
             using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Date";       // Headers
+            worksheet.Cells[1, 1].Value = "Colour"; // Headers
             worksheet.Cells[1, 2].Value = "Note";
-            worksheet.Cells[2, 1].Value = "2023-09-12"; // Columns
+            worksheet.Cells[2, 1].Value = "Green";  // Columns
 
             // Act
             var (models, validations) = excel.Parse<TestModel>(worksheet);
 
             // Assert
             var model = models.FirstOrDefault();
-            Assert.AreEqual(new DateTime(2023, 09, 12), model?.Date);
+            Assert.AreEqual(TestEnum.Green, model?.Colour);
         }
 
         [TestMethod]
-        public void ParseNullableDateIsNullReturnsNull()
+        public void ParseNullableEnumIsNullReturnsNull()
         {
             // Arrange
             using var excel = new ExcelParser();
 
             var worksheet = excel.CreateWorksheet();
-            worksheet.Cells[1, 1].Value = "Date";   // Headers
+            worksheet.Cells[1, 1].Value = "Colour"; // Headers
             worksheet.Cells[1, 2].Value = "Note";
             worksheet.Cells[2, 1].Value = null;     // Columns
             worksheet.Cells[2, 2].Value = "This is a note";
@@ -46,7 +60,7 @@
             // Assert
             Assert.AreEqual(1, models.Count);
             var model = models.First();
-            Assert.IsNull(model?.Date);
+            Assert.IsNull(model?.Colour);
         }
     }
 }
