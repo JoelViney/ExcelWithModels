@@ -18,7 +18,14 @@ namespace ExcelWithModels
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            _excelPackage = new ExcelPackage();            
+            _excelPackage = new ExcelPackage();
+        }
+
+        public ExcelParser(MemoryStream stream)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            _excelPackage = new ExcelPackage(stream);
         }
 
         public void Dispose()
@@ -28,6 +35,10 @@ namespace ExcelWithModels
 
         #endregion
 
+        public ExcelWorksheet GetWorksheet()
+        {
+            return _excelPackage.Workbook.Worksheets[0];
+        }
 
         public ExcelWorksheet CreateWorksheet(string name = "Sheet1")
         {
@@ -129,6 +140,10 @@ namespace ExcelWithModels
                 {
                     property.SetValue(item, null);
                 }
+                else if (cellValue is DateTime dateValue)
+                {
+                    property.SetValue(item, dateValue); // If the value is a datetime, ignore the formatting and just use the value.
+                }
                 else if (columnMapping.Format != null)
                 {
                     if (DateTime.TryParseExact(cellText, columnMapping.Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
@@ -143,10 +158,6 @@ namespace ExcelWithModels
                 else if (DateTime.TryParse(cellText, out DateTime date))
                 {
                     property.SetValue(item, date);
-                }
-                else if (cellValue is DateTime dateValue)
-                {
-                    property.SetValue(item, dateValue);
                 }
                 else
                 {
@@ -175,6 +186,10 @@ namespace ExcelWithModels
                 if (columnMapping.Nullable && string.IsNullOrEmpty(cellText))
                 {
                     property.SetValue(item, null);
+                }
+                else if (cellValue is int intValue)
+                {
+                    property.SetValue(item, intValue);
                 }
                 else if (Int32.TryParse(cellText, out int number))
                 {
