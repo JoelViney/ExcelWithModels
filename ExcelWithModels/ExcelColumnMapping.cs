@@ -79,7 +79,7 @@ namespace ExcelWithModels
 
                 var required = Attribute.IsDefined(property, typeof(ExcelRequiredAttribute));
 
-                if (!headers.Any(x => x.name == columnName) && (wordifiedColumnName != null && !headers.Any(x => x.name == wordifiedColumnName)))
+                if (!headers.Any(x => x.name == columnName) && (wordifiedColumnName == null || !headers.Any(x => x.name == wordifiedColumnName)))
                 {
                     // No matching header for the property.
                     if (!optional)

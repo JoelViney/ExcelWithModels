@@ -1,7 +1,5 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using static OfficeOpenXml.ExcelErrorValue;
-using System.Data;
 
 namespace ExcelWithModels
 {
