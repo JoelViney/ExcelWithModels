@@ -9,12 +9,36 @@
             public DateTime? Date { get; set; }
         }
 
+        public class TestModel2
+        {
+            [ExcelFormat("dd/MM/yyyy")]
+            public DateTime Date { get; set; }
+        }
+
         public class AmericanTestModel
         {
             [ExcelFormat("MM/dd/yyyy")]
             public DateTime? Date { get; set; }
         }
 
+
+        [TestMethod]
+        public void ParseFormattedNullableDate()
+        {
+            // Arrange
+            using var excel = new ExcelParser();
+
+            var worksheet = excel.CreateWorksheet();
+            worksheet.Cells[1, 1].Value = "Date";       // Headers   
+            worksheet.Cells[2, 1].Value = "13/09/2023"; // Columns
+
+            // Act
+            var (models, validations) = excel.Parse<TestModel>(worksheet);
+
+            // Assert
+            var model = models.FirstOrDefault();
+            Assert.AreEqual(new DateTime(2023, 09, 13), model?.Date);
+        }
 
         [TestMethod]
         public void ParseFormattedDate()
@@ -27,7 +51,7 @@
             worksheet.Cells[2, 1].Value = "13/09/2023"; // Columns
 
             // Act
-            var (models, validations) = excel.Parse<TestModel>(worksheet);
+            var (models, validations) = excel.Parse<TestModel2>(worksheet);
 
             // Assert
             var model = models.FirstOrDefault();

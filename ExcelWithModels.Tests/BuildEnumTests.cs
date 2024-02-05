@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ExcelWithModels
+﻿namespace ExcelWithModels
 {
     [TestClass]
     public class BuildEnumTests
@@ -17,11 +11,24 @@ namespace ExcelWithModels
             RedOrOrange = 4
         }
 
+        public enum StatusEnum
+        {
+            NotSpecified = 0,
+            Active
+        }
+
         public class TestModel
         {
             public TestEnum Colour { get; set; }
             public string? Note { get; set; }
         }
+
+        public class TestModel2
+        {
+            public StatusEnum Status { get; set; }
+            public string? Note { get; set; }
+        }
+
 
         [TestMethod]
         public void BuildEnumTest()
@@ -42,6 +49,27 @@ namespace ExcelWithModels
 
             Assert.AreEqual("Colour", worksheet.Cells[1, 1].Value);
             Assert.AreEqual("Green", worksheet.Cells[2, 1].Value);
+        }
+
+        [TestMethod]
+        public void BuildActiveEnumTest()
+        {
+            // Arrange
+            var list = new List<TestModel2>()
+            {
+                new TestModel2() { Status = StatusEnum.Active }
+            };
+
+            using var excel = new ExcelBuilder();
+
+            // Act
+            var xls = excel.Build<TestModel2>(list);
+
+            // Assert
+            var worksheet = xls.Workbook.Worksheets[0];
+
+            Assert.AreEqual("Status", worksheet.Cells[1, 1].Value);
+            Assert.AreEqual("Active", worksheet.Cells[2, 1].Value);
         }
     }
 }

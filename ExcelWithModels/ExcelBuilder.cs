@@ -73,7 +73,7 @@ namespace ExcelWithModels
             return _excelPackage;
         }
     
-        private void SetCellValue(ExcelRange cell, object? value, ExcelColumnMapping columnMapping, bool datesToStrings)
+        private static void SetCellValue(ExcelRange cell, object? value, ExcelColumnMapping columnMapping, bool datesToStrings)
         {
             if (value == null)
             {
@@ -91,13 +91,22 @@ namespace ExcelWithModels
                     cellValue = date.ToString(format);
                 }
             }
-            else if (columnMapping.PropertyType == typeof(Enum))
+            else if (columnMapping.PropertyType == typeof(DateTime?))
+            {
+                if (datesToStrings)
+                {
+                    var date = (DateTime)value;
+                    var format = columnMapping.Format ?? DefaultDateFormat;
+                    cellValue = date.ToString(format);
+                }
+            }
+            else if (columnMapping.PropertyType.BaseType == typeof(Enum))
             {
                 cellValue = value.ToString();
             }
             else
             {
-                cellValue = value.ToString();
+                cellValue = value;
             }
 
             cell.Value = cellValue;
