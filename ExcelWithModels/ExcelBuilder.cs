@@ -81,25 +81,19 @@ namespace ExcelWithModels
                 return;
             }
             
-            object? cellValue = null;
-            if (columnMapping.PropertyType == typeof(DateTime))
-            {
-                if (datesToStrings)
+            object? cellValue;
+            if (datesToStrings && columnMapping.PropertyType == typeof(DateTime))
                 {
                     var date = (DateTime)value;
                     var format = columnMapping.Format ?? DefaultDateFormat;
                     cellValue = date.ToString(format);
                 }
-            }
-            else if (columnMapping.PropertyType == typeof(DateTime?))
-            {
-                if (datesToStrings)
+            else if (datesToStrings && columnMapping.PropertyType == typeof(DateTime?))
                 {
                     var date = (DateTime)value;
                     var format = columnMapping.Format ?? DefaultDateFormat;
                     cellValue = date.ToString(format);
                 }
-            }
             else if (columnMapping.PropertyType.BaseType == typeof(Enum))
             {
                 cellValue = value.ToString();

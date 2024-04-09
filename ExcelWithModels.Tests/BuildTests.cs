@@ -31,7 +31,7 @@
             using var excel = new ExcelBuilder();
 
             // Act
-            var xls = excel.Build<TestModel>(list);
+            var xls = excel.Build<TestModel>(list, datesToStrings: false);
 
             // Assert
             var worksheet = xls.Workbook.Worksheets[0];
