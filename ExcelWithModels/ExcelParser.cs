@@ -16,14 +16,14 @@ namespace ExcelWithModels
 
         public ExcelParser()
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             _excelPackage = new ExcelPackage();
         }
 
         public ExcelParser(MemoryStream stream)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            //ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             _excelPackage = new ExcelPackage(stream);
         }

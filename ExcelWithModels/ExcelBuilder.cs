@@ -13,7 +13,7 @@ namespace ExcelWithModels
 
         public ExcelBuilder()
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            // ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             _excelPackage = new ExcelPackage();
         }
@@ -80,20 +80,20 @@ namespace ExcelWithModels
                 cell.Value = null;
                 return;
             }
-            
+
             object? cellValue;
             if (datesToStrings && columnMapping.PropertyType == typeof(DateTime))
-                {
-                    var date = (DateTime)value;
-                    var format = columnMapping.Format ?? DefaultDateFormat;
-                    cellValue = date.ToString(format);
-                }
+            {
+                var date = (DateTime)value;
+                var format = columnMapping.Format ?? DefaultDateFormat;
+                cellValue = date.ToString(format);
+            }
             else if (datesToStrings && columnMapping.PropertyType == typeof(DateTime?))
-                {
-                    var date = (DateTime)value;
-                    var format = columnMapping.Format ?? DefaultDateFormat;
-                    cellValue = date.ToString(format);
-                }
+            {
+                var date = (DateTime)value;
+                var format = columnMapping.Format ?? DefaultDateFormat;
+                cellValue = date.ToString(format);
+            }
             else if (columnMapping.PropertyType.BaseType == typeof(Enum))
             {
                 cellValue = value.ToString();
