@@ -13,13 +13,18 @@
 
         }
 
+        // Expected Output:
+        // Name       | Value | Date       | NullableDate
+        // -----------+-------+------------+-------------
+        // John Smith |  1234 | 2023-06-11 | 2024-05-04
+        //
         [TestMethod]
         public void BuildTest()
         {
             // Arrange
             var list = new List<TestModel>()
             {
-                new TestModel() 
+                new()
                 { 
                     Name = "John Smith", 
                     Value = 1234, 

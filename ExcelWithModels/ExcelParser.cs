@@ -10,7 +10,7 @@ namespace ExcelWithModels
     /// </summary>
     public class ExcelParser : IDisposable
     {
-        private ExcelPackage _excelPackage;
+        private readonly ExcelPackage _excelPackage;
 
         #region Constructors/Destructors....
 
@@ -92,7 +92,7 @@ namespace ExcelWithModels
         }
 
 
-        private List<ExcelValidation> SetPropertyValue<T>(T item, ExcelColumnMapping columnMapping, PropertyInfo? property, ExcelRange cell, int row)
+        private static List<ExcelValidation> SetPropertyValue<T>(T item, ExcelColumnMapping columnMapping, PropertyInfo? property, ExcelRange cell, int row)
         {
             var validations = new List<ExcelValidation>();
 
